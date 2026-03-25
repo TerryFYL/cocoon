@@ -1,0 +1,19 @@
+{
+  "current_stage": 1,
+  "stage_session_count": 0,
+  "total_session_count": 0,
+  "scaffold_level": 0.80,
+  "subskills": {
+    "任务框定": 0.0,
+    "提示架构": 0.0,
+    "输出评估": 0.0,
+    "迭代策略": 0.0,
+    "能力映射": 0.0,
+    "整合思维": 0.0
+  },
+  "scaffold_floor_count": 0,
+  "last_assessment": "",
+  "last_stage_transition": "",
+  "current_session_id": "",
+  "transition_signals": []
+}

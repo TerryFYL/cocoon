@@ -200,6 +200,14 @@ def get_due_retrievals(schedule: list, now: datetime) -> list:
     return due
 
 
+def reschedule_item(item, now: datetime) -> None:
+    """SM-2 reschedule: advance interval by ease_factor"""
+    item.review_count += 1
+    new_interval = item.interval_hours * item.ease_factor
+    item.interval_hours = min(new_interval, MAX_INTERVAL_HOURS)
+    item.next_review = (now + timedelta(hours=item.interval_hours)).isoformat()
+
+
 def create_new_retrieval_items(user_state: dict, existing_skills: set) -> list:
     weak_skills = get_weakest_skills(user_state)
     new_items = []
@@ -246,6 +254,7 @@ def on_bootstrap(event: dict) -> dict:
             prompt_data = generate_retrieval_prompt(item.skill, user_state)
             if prompt_data:
                 retrieval_prompts.append(prompt_data)
+                reschedule_item(item, now)  # advance SM-2 schedule
 
     next_due_hours = -1
     future_items = [

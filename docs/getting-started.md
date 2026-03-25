@@ -9,7 +9,7 @@ Cocoon 运行在 OpenClaw 之上。如果还没有安装：https://openclaw.ai
 ### 2. 克隆并安装
 
 ```bash
-git clone https://github.com/anthropics/cocoon.git
+git clone https://github.com/TerryFYL/cocoon.git
 cd cocoon
 bash scripts/install.sh
 ```

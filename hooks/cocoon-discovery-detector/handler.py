@@ -19,7 +19,7 @@ from typing import Optional
 
 DATA_DIR = Path.home() / ".openclaw" / "cocoon" / "discoveries"
 LOG_FILE = DATA_DIR / "discovery_log.jsonl"
-STAGE_FILE = Path.home() / ".openclaw" / "cocoon" / "user_state.json"
+STATE_FILE = Path.home() / ".openclaw" / "cocoon" / "user_state.json"
 
 AHA_PATTERNS = [
     (r"(?:哦|啊)[!！]?\s*(?:原来|所以|怪不得|难怪)", "realization", 0.85),
@@ -67,7 +67,7 @@ class Discovery:
 
 def load_user_state() -> dict:
     try:
-        with open(STAGE_FILE, "r", encoding="utf-8") as f:
+        with open(STATE_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         return {"current_stage": 1, "session_count": 0, "scaffold_level": 0.80}
@@ -139,6 +139,22 @@ def save_discovery(discovery: Discovery) -> None:
         f.write(json.dumps(asdict(discovery), ensure_ascii=False) + "\n")
 
 
+def append_transition_signal(signal_name: str) -> None:
+    """写入 discovery 类型信号到 user_state.transition_signals，支持阶段跃迁评估"""
+    try:
+        with open(STATE_FILE, "r", encoding="utf-8") as f:
+            state = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        state = {"transition_signals": []}
+    if "transition_signals" not in state:
+        state["transition_signals"] = []
+    if signal_name not in state["transition_signals"]:
+        state["transition_signals"].append(signal_name)
+    Path(STATE_FILE).parent.mkdir(parents=True, exist_ok=True)
+    with open(STATE_FILE, "w", encoding="utf-8") as f:
+        json.dump(state, f, ensure_ascii=False, indent=2)
+
+
 def on_message_received(event: dict) -> dict:
     message = event.get("message", "")
     context_before = event.get("context_before", "")
@@ -146,6 +162,8 @@ def on_message_received(event: dict) -> dict:
     if discovery is None:
         return {"discovery_detected": False, "discovery": None, "mirror_trigger": False}
     save_discovery(discovery)
+    if discovery.stage_transition_signal:
+        append_transition_signal(discovery.discovery_type)
     mirror_trigger = (
         discovery.confidence >= 0.80
         or discovery.stage_transition_signal

@@ -160,7 +160,8 @@ def on_message_received(event):
     for signal in new_signals:
         save_signal(signal)
     mindset_state = load_mindset_state()
-    level = assess_regression_level(mindset_state, new_signals)
+    # Note: load_mindset_state already includes new_signals from the log file
+    level = assess_regression_level(mindset_state, [])
     guidance = generate_response_guidance(level, user_stage, new_signals)
     return {"regression_detected": level > 0, "regression_level": level, "signals": [asdict(s) for s in new_signals], "guidance": guidance, "scaffold_adjustment": guidance.get("scaffold_adjustment", 0.0)}
 

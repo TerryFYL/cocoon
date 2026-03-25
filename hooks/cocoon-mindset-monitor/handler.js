@@ -74,6 +74,19 @@ const cocoonMindsetMonitor = async (event) => {
     const level = result.regression_level;
     const adj = result.scaffold_adjustment;
     console.log(`[cocoon-mindset-monitor] Regression L${level} detected, scaffold +${adj}`);
+
+    // Apply scaffold adjustment to user_state.json
+    if (adj > 0) {
+      const STATE_FILE = path.join(COCOON_DIR, "user_state.json");
+      try {
+        const raw = await fs.readFile(STATE_FILE, "utf-8");
+        const state = JSON.parse(raw);
+        state.scaffold_level = Math.min(1.0, (state.scaffold_level || 0.8) + adj);
+        await fs.writeFile(STATE_FILE, JSON.stringify(state, null, 2));
+      } catch (err) {
+        console.error("[cocoon-mindset-monitor] Failed to update scaffold:", err?.message);
+      }
+    }
   }
 };
 

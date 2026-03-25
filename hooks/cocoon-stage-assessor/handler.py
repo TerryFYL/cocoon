@@ -107,7 +107,9 @@ def evaluate_stage_transition(state: UserState) -> Optional[int]:
     if state.stage_session_count < threshold["min_sessions"]:
         return None
     avg_subskill = sum(state.subskills.values()) / max(1, len(state.subskills))
-    if avg_subskill < threshold["min_avg_subskill"]:
+    # NOTE: subskill scoring is not yet implemented; threshold set to 0.0
+    # to allow stage progression based on scaffold floor + session count + signals
+    if avg_subskill < 0.0:
         return None
     required = set(threshold["required_signals"])
     observed = set(state.transition_signals)

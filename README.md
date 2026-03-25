@@ -82,7 +82,7 @@ AI做80%        AI做60%          各做一半       你做80%         你说了
 ### 安装
 
 ```bash
-git clone https://github.com/anthropics/cocoon.git
+git clone https://github.com/TerryFYL/cocoon.git
 cd cocoon
 bash scripts/install.sh
 ```

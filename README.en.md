@@ -83,7 +83,7 @@ The scaffold decays automatically. As you grow stronger, AI steps back. Not a pr
 ### Install
 
 ```bash
-git clone https://github.com/anthropics/cocoon.git
+git clone https://github.com/TerryFYL/cocoon.git
 cd cocoon
 bash scripts/install.sh
 ```

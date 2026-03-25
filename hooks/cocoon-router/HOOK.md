@@ -1,6 +1,6 @@
 ---
 name: cocoon-router
-description: "Session tracker and intent signal router for Cocoon learning system"
+description: "Session tracker for Cocoon learning system"
 metadata:
   openclaw:
     emoji: "🧭"
@@ -12,11 +12,14 @@ metadata:
 
 # Cocoon Router Hook
 
-Tracks active Cocoon sessions and detects intent signals to route between agents (搭档/同行者/镜子).
+Tracks active Cocoon sessions. Intent routing is handled by each Agent's LLM (SOUL.md 边界与切换 section) — no longer done via regex in the hook.
 
-## Routing Signals
+## Session Tracking
 
-- `task` → 搭档 (cocoon-partner): execution-oriented messages
-- `reflect` → 同行者 (cocoon-companion): reflective/emotional messages
-- `progress` → 镜子 (cocoon-mirror): self-observation messages
-- `ambiguous` → stays with current agent
+- `agent:bootstrap` → records active agent to `active_agent.json`
+- Other hooks (`mindset-monitor`, etc.) use this to determine if they're in a Cocoon session
+- Session TTL: 1 hour
+
+## 意图路由
+
+已移至 LLM 层。各 Agent 根据 SOUL.md 中的"边界与切换"规则自行判断消息是否属于自己，如果不是则建议用户切换到合适的 Agent。

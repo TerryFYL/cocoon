@@ -2,7 +2,9 @@
  * Cocoon Router Hook
  *
  * 1. On agent:bootstrap — detects if a Cocoon agent started, writes active_agent.json
- * 2. On message:received — checks if in cocoon session, detects routing signal type
+ *    (其他 hook 如 mindset-monitor 依赖这个判断是否在 cocoon session)
+ * 2. On message:received — 意图路由已移至 LLM（各 Agent 的 SOUL.md 里自行判断边界）
+ *    此处不再做正则匹配
  */
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -12,13 +14,6 @@ const COCOON_DIR = path.join(HOME, ".openclaw", "cocoon");
 const ACTIVE_AGENT_FILE = path.join(COCOON_DIR, "active_agent.json");
 const COCOON_AGENT_IDS = ["cocoon-partner", "cocoon-companion", "cocoon-mirror"];
 const COCOON_SESSION_TTL_MS = 3600000; // 1 hour
-
-// Routing signal patterns
-const SIGNAL_PATTERNS = {
-  task: /帮[我一]|[写做实现创建删除修复调试]一个|代码|脚本|函数|执行|运行|部署|能不能帮|请帮/,
-  reflect: /感觉|觉得|不确定|为什么我|想聊聊|我在想|有点困惑|说说|我怎么|我有点/,
-  progress: /我发现|我注意到|我进步|我变了|我以前|我现在|我的模式|我的规律|我的思维/,
-};
 
 /**
  * Extract agent ID from workspace dir path
@@ -45,17 +40,6 @@ async function isCocoonSession() {
   }
 }
 
-/**
- * Detect routing signal type from message content
- */
-function detectSignal(message) {
-  if (!message) return "ambiguous";
-  for (const [type, pattern] of Object.entries(SIGNAL_PATTERNS)) {
-    if (pattern.test(message)) return type;
-  }
-  return "ambiguous";
-}
-
 const cocoonRouter = async (event) => {
   // On bootstrap: record active agent if it's a cocoon agent
   if (event.type === "agent" && event.action === "bootstrap") {
@@ -79,17 +63,8 @@ const cocoonRouter = async (event) => {
     return;
   }
 
-  // On message received: detect signal type for analytics
-  if (event.type !== "message" || event.action !== "received") return;
-  if (!(await isCocoonSession())) return;
-
-  const content = event.context?.content;
-  if (!content) return;
-
-  const signalType = detectSignal(content);
-  if (signalType !== "ambiguous") {
-    console.log(`[cocoon-router] Signal: ${signalType} | ${content.slice(0, 60)}`);
-  }
+  // On message received: 意图路由由各 Agent 的 LLM 自行判断
+  // 此处不再做正则匹配或信号检测
 };
 
 export default cocoonRouter;

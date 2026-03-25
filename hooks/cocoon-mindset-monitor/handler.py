@@ -23,9 +23,9 @@ REGRESSION_PATTERNS = {
         (r"(?:这样)?(?:对吗|可以吗|行吗|是不是|对不对)[?？]", "over_confirmation", 0.4),
         (r"(?:你(?:来)?(?:决定|选择|定)(?:吧)?|你觉得(?:哪个|怎样)(?:好|比较好))", "decision_avoidance", 0.5),
         (r"我(?:是不是|可能)(?:不太|不够)(?:会|懂|理解|明白)", "mild_self_doubt", 0.4),
-        (r"(?:还是)?(?:你|AI)(?:直接|帮我)(?:做|写|决定)(?:吧|就好)", "over_reliance", 0.5),
     ],
     "moderate": [
+        (r"(?:还是)?(?:你|AI)(?:直接(?:帮我)?|帮我)(?:做|写|决定)(?:吧|就好)?", "over_reliance", 0.7),
         (r"我(?:不想|不敢|害怕|担心)(?:自己)?(?:做|试|选|决定)", "avoidance", 0.7),
         (r"我(?:做|搞|弄)不(?:好|了|来|到)", "ability_denial", 0.7),
         (r"(?:还是|算了).+?(?:你来|你做|你帮我|你直接)", "regression", 0.6),
@@ -73,8 +73,10 @@ def load_user_state():
     except (FileNotFoundError, json.JSONDecodeError):
         return {"current_stage": 1, "scaffold_level": 0.80}
 
-def load_mindset_state():
+def load_mindset_state(exclude_timestamps: set = None):
     state = MindsetState()
+    if exclude_timestamps is None:
+        exclude_timestamps = set()
     if not MINDSET_LOG.exists():
         return state
     now = datetime.now()
@@ -86,7 +88,10 @@ def load_mindset_state():
                 continue
             try:
                 record = json.loads(line)
-                ts = datetime.fromisoformat(record.get("timestamp", ""))
+                ts_str = record.get("timestamp", "")
+                if ts_str in exclude_timestamps:
+                    continue
+                ts = datetime.fromisoformat(ts_str)
                 if ts >= window_start:
                     state.signals_in_window.append(record)
                 level = record.get("level", "")
@@ -133,6 +138,8 @@ def assess_regression_level(state, new_signals):
     if mild_count >= MILD_THRESHOLD: return 1
     for signal in new_signals:
         if signal.level == "severe" and signal.confidence >= 0.75: return 3
+        if signal.level == "moderate" and signal.confidence >= 0.65: return 2
+        if signal.level == "mild" and signal.confidence >= 0.55: return 1
     return 0
 
 def generate_response_guidance(level, user_stage, signals):
@@ -159,9 +166,9 @@ def on_message_received(event):
         return {"regression_detected": False, "regression_level": 0, "signals": [], "guidance": {"adjust": False}, "scaffold_adjustment": 0.0}
     for signal in new_signals:
         save_signal(signal)
-    mindset_state = load_mindset_state()
-    # Note: load_mindset_state already includes new_signals from the log file
-    level = assess_regression_level(mindset_state, [])
+    exclude_ts = {s.timestamp for s in new_signals}
+    mindset_state = load_mindset_state(exclude_timestamps=exclude_ts)
+    level = assess_regression_level(mindset_state, new_signals)
     guidance = generate_response_guidance(level, user_stage, new_signals)
     return {"regression_detected": level > 0, "regression_level": level, "signals": [asdict(s) for s in new_signals], "guidance": guidance, "scaffold_adjustment": guidance.get("scaffold_adjustment", 0.0)}
 

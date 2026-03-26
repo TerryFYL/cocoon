@@ -7,8 +7,8 @@
     │
     ▼
 ┌──────────────────┐
-│  cocoon-router   │  ← Hook: 意图信号检测
-│  (handler.js)    │     task / reflect / progress / ambiguous
+│  cocoon-router   │  ← Hook: 会话跟踪
+│  (handler.js)    │     记录 active_agent.json
 └──────┬───────────┘
        │
        ├──→ cocoon-mindset-monitor  ← Hook: 心态回退检测 (message:received)
@@ -48,7 +48,7 @@
 
 | Hook | 事件 | 语言 | 说明 |
 |------|------|------|------|
-| cocoon-router | agent:bootstrap, message:received | JS | 会话追踪 + 意图信号分类 |
+| cocoon-router | agent:bootstrap | JS | 会话追踪（意图路由已移至 LLM 层） |
 | cocoon-discovery-detector | message:received | JS→Python | 啊哈时刻检测（18种模式） |
 | cocoon-stage-assessor | agent:bootstrap | JS→Python | session 计数 + 脚手架衰减 + 阶段跃迁评估 |
 | cocoon-retrieval-trigger | agent:bootstrap | JS→Python | SM-2 间隔检索 + bootstrap 文件注入 |
@@ -90,7 +90,7 @@ handler.py (核心逻辑)
 **为什么 JS + Python 双层？**
 - JS 是 OpenClaw Hook 的原生格式，负责事件接口
 - Python 处理复杂逻辑（正则、数学、状态管理），更易维护和测试
-- cocoon-router 是唯一纯 JS 的 Hook（路由逻辑简单，不需要 Python）
+- cocoon-router 是唯一纯 JS 的 Hook（只做会话跟踪，不需要 Python）
 
 ## 六子技能
 

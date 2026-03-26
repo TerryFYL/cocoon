@@ -101,7 +101,7 @@ bash cocoon/scripts/cleanup.sh
 A: 有。手动修改 `user_state.json` 的 `current_stage` 到 3 或 4，跳过前面的阶段。
 
 **Q: 支持英文吗？**
-A: Agent 的 SOUL.md 是中文的（行为指令），但你可以用任何语言跟它对话。意图路由的正则目前只支持中文，PR 欢迎。
+A: Agent 的 SOUL.md 是中文的（行为指令），但你可以用任何语言跟它对话。意图路由由 LLM 理解判断，不依赖正则，不受语言限制。
 
 **Q: 不用 OpenClaw 能用吗？**
 A: 目前不能。但核心设计（SOUL.md + stage-config.md）可以手动适配到任何 AI Agent 平台。

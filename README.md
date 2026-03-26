@@ -65,7 +65,7 @@ AI做80%        AI做60%          各做一半       你做80%         你说了
 
 | 机制 | 做什么 | 怎么做 |
 |------|--------|--------|
-| **意图路由** | 自动识别你的消息类型 | 中文正则匹配 → 分配到搭档/同行者/镜子 |
+| **意图路由** | 自动识别你的消息类型 | LLM 理解判断 → 各 Agent 根据 SOUL.md 边界规则自行判断 |
 | **脚手架衰减** | AI 介入度随你成长递减 | 指数衰减 `s_min + (s_max - s_min) × e^(-λt)` |
 | **啊哈时刻检测** | 捕捉你的顿悟瞬间 | 18种认知飞跃模式 + 置信度评分 |
 | **心态回退监测** | 检测挫败和习得性无助 | 3级预警 + 自动上调脚手架 |
@@ -113,7 +113,7 @@ cocoon/
 │   ├── cocoon-companion/      # 同行者 — 自主感
 │   └── cocoon-mirror/         # 镜子 — 联结感
 ├── hooks/                     # 五个行为 Hook
-│   ├── cocoon-router/         # 意图路由（纯JS，快速）
+│   ├── cocoon-router/         # 意图路由（Session 跟踪，路由已移至 LLM 层）
 │   ├── cocoon-discovery-detector/  # 啊哈时刻检测
 │   ├── cocoon-stage-assessor/      # 阶段评估 + 脚手架衰减
 │   ├── cocoon-retrieval-trigger/   # 间隔检索练习

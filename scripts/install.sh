@@ -53,7 +53,7 @@ for hook in cocoon-router cocoon-discovery-detector cocoon-stage-assessor cocoon
 
   if [ -d "$SRC" ]; then
     mkdir -p "$HOOK_DIR"
-    cp "$SRC"/* "$HOOK_DIR/"
+    cp -r "$SRC"/* "$HOOK_DIR/"
     echo "   ✅ $hook"
   fi
 done
